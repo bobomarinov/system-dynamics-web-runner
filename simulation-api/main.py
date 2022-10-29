@@ -1,6 +1,7 @@
 import json
 
 import pysd
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
@@ -8,10 +9,7 @@ from starlette.responses import JSONResponse
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",
-    "http://localhost:8080",
-    "http://localhost:5000",
-    "http://localhost:8000"
+    "*",
 ]
 
 app.add_middleware(
@@ -53,3 +51,7 @@ def get_model_plot():
     model = pysd.read_vensim("models/Teacup/Teacup.mdl")
     model.run()
     return model.plot()
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

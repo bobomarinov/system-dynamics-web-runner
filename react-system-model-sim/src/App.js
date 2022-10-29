@@ -3,6 +3,8 @@ import React, {useRef, useState} from 'react';
 import Plot from 'react-plotly.js';
 import axios from 'axios';
 
+let address = '78.130.158.235';
+let port = '8000';
 
 function Plot_system({x_data, y_data}) {
     //TODO: send the whole data from API to this component including more than one plot and the metadata
@@ -18,8 +20,8 @@ function Plot_system({x_data, y_data}) {
                     marker: {color: 'red'},
                 },
             ]}
-
-            layout={{width: 1200, height: 700, title: 'Model name'}}
+            //layout for mobile
+            layout={{width: 600, height: 400, title: 'A Fancy Plot'}}
         />
     );
 }
@@ -35,7 +37,7 @@ export default function App() {
 
     function simulate() {
         console.log('simulate');
-        axios.get(`http://localhost:8000/model-results?time=0&room_temperature=${room_temperature}&initial_teacup_temperature=${teapot_temperature}&final_time_parameter=${final_time_parameter}`)
+        axios.get(`http://${address}:${port}/model-results?time=0&room_temperature=${room_temperature}&initial_teacup_temperature=${teapot_temperature}&final_time_parameter=${final_time_parameter}`)
             .then(res => {
                 set_x_data(Object.keys(res.data).map(Number));
                 let y_array = [];
