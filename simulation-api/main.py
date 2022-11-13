@@ -6,6 +6,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
+# constant
+model_path = "models/Bank Balance/bank_balance.mdl"
+
 app = FastAPI()
 
 origins = [
@@ -23,15 +26,17 @@ app.add_middleware(
 
 @app.get("/model-results")
 def get_model_results(
-        room_temperature: float = 20.0,
-        initial_teacup_temperature: float = 20.0,
+        deposits: float = 20.0,
+        initial_balance: float = 20.0,
         final_time_parameter: int = 100.0,
+        interest: float = 0.1,
+        average_inflation: float = 0.1
 ):
-    model = pysd.read_vensim("models/Teacup/Teacup.mdl")
+    model = pysd.read_vensim(model_path)
     dataframe = model.run(progress=True,
-                          params={'Room Temperature': room_temperature},
-                          initial_condition=(0, {'teacup_temperature': initial_teacup_temperature}),
-                          return_columns=['Teacup Temperature'],
+                          params={'Deposits': deposits, 'Interest Rate': interest, 'Inflation Rate': average_inflation},
+                          initial_condition=(0, {'balance': initial_balance}),
+                          return_columns=['Balance', 'Real Balance'],
                           final_time=final_time_parameter)
     result = dataframe.to_dict('index')
     # parsed = json.loads(dataframe)
@@ -40,7 +45,7 @@ def get_model_results(
 
 @app.get("/model-details")
 def get_model_details():
-    model = pysd.read_vensim("models/Teacup/Teacup.mdl")
+    model = pysd.read_vensim(model_path)
     dataframe = model.doc.to_json(orient="records")
     parsed = json.loads(dataframe)
     return parsed
@@ -48,7 +53,7 @@ def get_model_details():
 
 @app.get("/model-plot")
 def get_model_plot():
-    model = pysd.read_vensim("models/Teacup/Teacup.mdl")
+    model = pysd.read_vensim(model_path)
     model.run()
     return model.plot()
 

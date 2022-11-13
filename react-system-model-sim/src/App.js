@@ -6,8 +6,7 @@ import axios from 'axios';
 let address = '78.130.158.235';
 let port = '8000';
 
-function Plot_system({x_data, y_data}) {
-    //TODO: send the whole data from API to this component including more than one plot and the metadata
+function Plot_system({x_data, y_data, y_data2}) {
     return (
         <Plot
 
@@ -16,12 +15,21 @@ function Plot_system({x_data, y_data}) {
                     x: x_data,
                     y: y_data,
                     type: 'scatter',
-                    mode: 'lines+markers',
-                    marker: {color: 'red'},
+                    mode: 'lines',
+                    marker: {color: 'blue'},
+                    name: 'Balance'
                 },
+                {
+                    x: x_data,
+                    y: y_data2,
+                    type: 'scatter',
+                    mode: 'lines',
+                    marker: {color: 'green'},
+                    name: 'Real Balance'
+                }
             ]}
-            //layout for mobile
-            layout={{width: 600, height: 400, title: 'A Fancy Plot'}}
+            //TODO:layout for mobile
+            layout={{width: 600, height: 400, title: 'Balance', backgroundColor: 'gray'}}
         />
     );
 }
@@ -30,23 +38,29 @@ function Plot_system({x_data, y_data}) {
 export default function App() {
     const [x_data, set_x_data] = useState([0, 0]); //to be updated by the model
     const [y_data, set_y_data] = useState([0, 0]); //to be updated by the model
-    const [room_temperature, set_room_temperature] = useState(0); //to be updated by the model
-    const [teapot_temperature, set_teapot_temperature] = useState(0); //to be updated by the model
+    const [y_data2, set_y_data2] = useState([0, 0]); //to be updated by the model
+    const [deposits, set_deposits] = useState(0); //to be updated by the model
+    const [initial_balance, set_initial_balance] = useState(0); //to be updated by the model
+    const [interest, set_interest] = useState(0); //to be updated by the model
+    const [average_inflation, set_average_inflation] = useState(0); //to be updated by the model
     const [final_time_parameter, set_final_time_parameter] = useState(0); //to be updated by the model
-    const FilePath = useRef(null);
 
     function simulate() {
         console.log('simulate');
-        axios.get(`http://${address}:${port}/model-results?time=0&room_temperature=${room_temperature}&initial_teacup_temperature=${teapot_temperature}&final_time_parameter=${final_time_parameter}`)
+        axios.get(`http://${address}:${port}/model-results?deposits=${deposits}&initial_balance=${initial_balance}&final_time_parameter=${final_time_parameter}&interest=${interest}&average_inflation=${average_inflation}`)
             .then(res => {
                 set_x_data(Object.keys(res.data).map(Number));
                 let y_array = [];
+                let y_array2 = [];
                 Object.values(res.data).forEach((value) => {
                     //append the value to the y_array
-                    y_array.push(value['Teacup Temperature']);
+                    y_array.push(value['Balance']);
+                    y_array2.push(value['Real Balance']);
                 });
                 console.log(y_array);
+                console.log(y_array2);
                 set_y_data(y_array);
+                set_y_data2(y_array2);
             })
     }
 
@@ -77,10 +91,10 @@ export default function App() {
         )
     }
 
-    function input_box_room_temperature() {
+    function input_box_initial_balance() {
         const handleInputChange = (event) => {
             console.log(event.target.value);
-            set_room_temperature(event.target.value);
+            set_initial_balance(event.target.value);
         }
 
         return (
@@ -88,10 +102,10 @@ export default function App() {
         )
     }
 
-    function input_box_teapot_temperature() {
+    function input_box_interest() {
         const handleInputChange = (event) => {
             console.log(event.target.value);
-            set_teapot_temperature(event.target.value);
+            set_interest(event.target.value/100);
         }
 
         return (
@@ -99,23 +113,32 @@ export default function App() {
         )
     }
 
-    const handleFileChange = event => {
-        const fileObj = event.target.files && event.target.files[0];
-        if (!fileObj) {
-            return;
+    function input_box_deposits() {
+        const handleInputChange = (event) => {
+            console.log(event.target.value);
+            set_deposits(event.target.value);
         }
-        console.log('fileObj is', fileObj);
-        event.target.value = null;
-        console.log(event.target.files);
-        console.log(fileObj);
-        console.log(fileObj.name);
-    };
 
+        return (
+            <input type="float" onChange={handleInputChange}/>
+        )
+    }
+
+    function input_box_average_inflation() {
+        const handleInputChange = (event) => {
+            console.log(event.target.value);
+            set_average_inflation(event.target.value/100);
+        }
+
+        return (
+            <input type="float" onChange={handleInputChange}/>
+        )
+    }
 
     return (
         <div className="App">
             <header className="App-header">
-                <h1>Simulation</h1>
+                <h1>Deposit Calculator</h1>
                 <div style={
                     {
                         display: 'flex',
@@ -123,24 +146,21 @@ export default function App() {
                         margin: '10px',
                     }
                 }>
-                    <div><input
-                        style={{display: 'none'}}
-                        ref={FilePath}
-                        type="file"
-                        onChange={handleFileChange}
-                    />
+                    <div>
                         <div style={{margin: '10px'}}>
-                            <div style={{margin: '10px'}}> Room Temperature: {input_box_room_temperature()}</div>
-                            <div style={{margin: '10px'}}> Teapot Temperature: {input_box_teapot_temperature()}</div>
-                            <div style={{margin: '10px'}}> Final Time: {input_box_final_time_parameter()}</div>
+                            <div style={{margin: '10px'}}> Initial Balance: {input_box_initial_balance()}</div>
+                            <div style={{margin: '10px'}}> Deposits (yearly): {input_box_deposits()}</div>
+                            <div style={{margin: '10px'}}> Interest (yearly %): {input_box_interest()}</div>
+                            <div style={{margin: '10px'}}> Average Inflation (yearly %): {input_box_average_inflation()}</div>
+                            <div style={{margin: '10px'}}> Time (years): {input_box_final_time_parameter()}</div>
                         </div>
                         <div style={{margin: '10px'}}>
-                        {simulate_button()}
+                            {simulate_button()}
                         </div>
                     </div>
 
                 </div>
-                <Plot_system x_data={x_data} y_data={y_data}/>
+                <Plot_system x_data={x_data} y_data={y_data} y_data2={y_data2}/>
             </header>
         </div>
     );

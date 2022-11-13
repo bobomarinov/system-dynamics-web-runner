@@ -5,6 +5,11 @@ Balance= INTEG (
 	~	Dollars
 	~		|
 
+Real Balance=
+    Balance - Balance*Inflation Rate
+    ~	Dollars
+    ~		|
+
 Deposits=
 	5
 	~	Dollars/Day
@@ -24,6 +29,11 @@ Interest Rate=
 	0.001
 	~	Dollars/Dollar/Day
 	~		|
+
+Inflation Rate=
+    0.001
+    ~	Dollars/Dollar/Day
+    ~		|
 
 ********************************************************
 	.Control
