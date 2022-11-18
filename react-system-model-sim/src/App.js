@@ -25,7 +25,7 @@ function Plot_system({x_data, y_data, y_data2}) {
                     type: 'scatter',
                     mode: 'lines',
                     marker: {color: 'green'},
-                    name: 'Real Balance'
+                    name: 'Calculated Balance'
                 }
             ]}
             //TODO:layout for mobile
